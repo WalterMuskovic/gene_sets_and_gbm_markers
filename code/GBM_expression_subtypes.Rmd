@@ -18,11 +18,11 @@ editor_options:
 The document will be split into the following sections:
 
   1. [Verhaak/TCGA subtypes](#anchor_1) - We get the genesets that define the four Verhaak/TCGA subtypes
-  2. [Glioblastoma gene sets](#anchor_2) - We get other gene sets relevant to glioblastoma from MSigDB
-  3. [Wang et al 2017](#anchor_3) - We get the three gene sets defined in Wang et al 2017 
-  4. [Neftel et al 2019](#anchor_4) - We get all of the gene sets defined in Neftel et al 2019 (defined using scRNA-seq data)
-  5. [Wang et al 2019](#anchor_5) - We get the list of differentially expressed genes between mesenchymal and proneural cells defined in Wang et al 2019 (defined using scRNA-seq data) 
-  6. [Couturier et al 2020](#anchor_6) - We get lists of genes in order of their correlation with the diffusion components used to classify cells in Couturier et al 2020.
+  2. [Wang et al 2017](#anchor_2) - We get the three gene sets defined in Wang et al 2017 
+  3. [Neftel et al 2019](#anchor_3) - We get all of the gene sets defined in Neftel et al 2019 (defined using scRNA-seq data)
+  4. [Wang et al 2019](#anchor_4) - We get the list of differentially expressed genes between mesenchymal and proneural cells defined in Wang et al 2019 (defined using scRNA-seq data) 
+  5. [Couturier et al 2020](#anchor_5) - We get lists of genes in order of their correlation with the diffusion components used to classify cells in Couturier et al 2020.
+  6. [MSigDB](#anchor_6) - We combine all MSigDB Version 7.0 gene sets with our GBM gene lists
 
 
 
@@ -35,6 +35,7 @@ suppressPackageStartupMessages({
   library(glue)
   library(tidyverse)
   library(readxl)
+  library(fgsea)
 })
  
 # Download files
@@ -55,40 +56,7 @@ read.delim("data/VERHAAK_GLIOBLASTOMA_CLASSICAL.txt")
 
 
 
-# Other glioblastoma gene sets {#anchor_2}
-
-We will also download some other gene sets from MSigDB relevant to the biology of glioblastoma that may come on handy during our analyses of scRNA-seq clusters.
-
-```{r other_glioblastoma_gene_sets, cache=TRUE}
-base_url <- "http://software.broadinstitute.org/gsea/msigdb/download_geneset.jsp?geneSetName="
-
-# BEIER_GLIOMA_STEM_CELL_UP - Genes up-regulated in cancer stem cells derived from glyoblastoma tumors: CD133+ [GeneID=8842] vs. CD133- cells.
-if(!file.exists("data/BEIER_GLIOMA_STEM_CELL_UP.txt")){
-  download.file(url = glue("{base_url}BEIER_GLIOMA_STEM_CELL_UP&fileType=txt"), destfile = "data/BEIER_GLIOMA_STEM_CELL_UP.txt")
-}
-
-# NUTT_GBM_VS_AO_GLIOMA_UP - Top 50 marker genes for glioblastoma multiforme (GBM), a class of high grade glioma.
-if(!file.exists("data/NUTT_GBM_VS_AO_GLIOMA_UP.txt")){
-  download.file(url = glue("{base_url}NUTT_GBM_VS_AO_GLIOMA_UP&fileType=txt"), destfile = "data/NUTT_GBM_VS_AO_GLIOMA_UP.txt")
-}
-
-# TCGA_GLIOBLASTOMA_COPY_NUMBER_DN - Genes down-regulated and displaying decreased copy number in glioblastoma samples.
-if(!file.exists("data/TCGA_GLIOBLASTOMA_COPY_NUMBER_DN.txt")){
-  download.file(url = glue("{base_url}TCGA_GLIOBLASTOMA_COPY_NUMBER_DN&fileType=txt"), destfile = "data/TCGA_GLIOBLASTOMA_COPY_NUMBER_DN.txt")
-}
-
-# TCGA_GLIOBLASTOMA_COPY_NUMBER_UP - Genes up-regulated and displaying increased copy number in glioblastoma samples.
-if(!file.exists("data/TCGA_GLIOBLASTOMA_COPY_NUMBER_UP.txt")){
-  download.file(url = glue("{base_url}TCGA_GLIOBLASTOMA_COPY_NUMBER_UP&fileType=txt"), destfile = "data/TCGA_GLIOBLASTOMA_COPY_NUMBER_UP.txt")
-}
-
-# Check the files are there
-str_subset(list.files("data"), "VERHAAK", negate = TRUE) 
-```
-
-
-
-# Wang et al 2017 - three subtypes {#anchor_3}
+# Wang et al 2017 - three subtypes {#anchor_2}
 
 In [Wang et al, Cancer Cell, 2017](https://doi.org/10.1016/j.ccell.2017.06.003) three glioblastoma subtypes are defined using gene expression data from 369 IDH-WT GBMs; proneural, classical and mesenchymal subtypes. Gene sets defining these subtypes were provided in Supplmentary table 1 of the paper.
 ```{r Wang_et_al, cache=TRUE}
@@ -116,7 +84,7 @@ write_tsv(classical, path = "data/Wang_2017_classical.tsv")
 
 
 
-# Neftel et al 2019 - four expression states {#anchor_4}
+# Neftel et al 2019 - four expression states {#anchor_3}
 
 In [Neftel et al, Cell, 2019](https://doi.org/10.1016/j.cell.2019.06.024), using scRNA-seq the authors define four expression states;
 
@@ -147,7 +115,7 @@ write_tsv(S2, path = "data/Nefel_2019_states.tsv")
 
 
 
-# Wang et al 2019, Proneural/Mesenchymal subtypes {#anchor_5}
+# Wang et al 2019, Proneural/Mesenchymal subtypes {#anchor_4}
 
 In [Wang et al, Cancer Discovery, 2019](https://doi.org/10.1158/2159-8290.cd-19-0329) the authors found two patient-independent clusters of neoplastic cells consistent across three different sequencing platforms. A differential expression test between clusters identified markers of the proneural (e.g., ASCL1, OLIG2) and mesenchymal (e.g., CD44, CHI3L1) subtypes as significant. These results are available in Supplementary Table S3.
 
@@ -174,7 +142,7 @@ write_tsv(as_tibble(cbind(proneural, mesenchymal)), path = "data/Wang_2019.tsv")
 ```
 
 
-# Couturier et al 2020, trilineage heirarchy {#anchor_6}
+# Couturier et al 2020, trilineage heirarchy {#anchor_5}
 
 In [Couturier et al, Nature Communications, 2020](https://doi.org/10.1038/s41467-020-17186-5) the authors created a human fetal brain cell roadmap and projected cancer cells into this dataset using diffusion embedding. Unfortunately they didn't make available gene sets to classify each GBM cell state, such as the top 40 gene signatures used in the heatmap in Fig. 1e, but they did make available lists of cancer genes in descending order of correlation with each diffusion component of the roadmap (Supplementary Data 2).
 
@@ -209,4 +177,105 @@ couturier_glial_progenitor <- S2$DC3[1:50]
 # Write out as tsv
 write_tsv(data.frame(couturier_neuronal, couturier_mesenchymal, couturier_oligo_lineage, couturier_glial_progenitor)
 , path = "data/Couturier_2020.tsv")
+```
+
+# MSigDB {#anchor_6}
+
+MSigDB Version 7.0 gene sets from www.gsea-msigdb.org/gsea/downloads.jsp on 27/08/2020. We import these .gmt files and save them out as a list. We will also add some GBM subtype/cell state gene sets. Once save out in this 'list of lists' format we can use it for GSEA with the `fgsea` R package.
+
+```{r MSigDB, cache=TRUE}
+if(!file.exists("data/MSigDB_and_gbm_gene_lists.rds")){
+  
+  #Import .gmt files downloaded from MSigDB:
+  
+  # All current MSigDB gene sets
+  all_gene_sets <- gmtPathways("data/msigdb.v7.1.symbols.gmt")
+  # Have a quick look at the data format
+  str(head(all_gene_sets))
+  
+  # Hallmark gene sets - Coherently expressed signatures derived by aggregating
+  # many MSigDB gene sets to represent well-defined biological states or processes.
+  hallmark_gene_sets <- gmtPathways("data/h.all.v7.1.symbols.gmt")
+  
+  # c1: positional gene sets - for each human chromosome and cytogenetic band.
+  positional_gene_sets <- gmtPathways("data/c1.all.v7.1.symbols.gmt")
+  
+  # c2: curated gene sets - from online pathway databases, publications in
+  # PubMed, and knowledge of domain experts;
+  # chemical and genetic perturbations
+  perturbations_gene_sets <- gmtPathways("data/c2.cgp.v7.1.symbols.gmt")
+  # all canonical pathways
+  canonical_pathways_gene_sets <- gmtPathways("data/c2.cp.v7.1.symbols.gmt")
+  # bioCarta
+  biocarta_gene_sets <- gmtPathways("data/c2.cp.biocarta.v7.1.symbols.gmt")
+  # KEGG
+  kegg_gene_sets <- gmtPathways("data/c2.cp.kegg.v7.1.symbols.gmt")
+  # PID
+  pid_gene_sets <- gmtPathways("data/c2.cp.pid.v7.1.symbols.gmt")
+  # reactome
+  reactome_gene_sets <- gmtPathways("data/c2.cp.reactome.v7.1.symbols.gmt")
+  
+  # c3: regulatory target gene sets - based on predicted transcription factor binding sites.
+  # All transcription factor targets, gene symbols
+  tf_gene_sets <- gmtPathways("data/c3.tft.v7.1.symbols.gmt")
+  
+  # c4: computational gene sets - defined by mining large collections of
+  # cancer-oriented microarray data.
+  # cancer gene neighborhoods
+  cancer_gene_gene_sets <- gmtPathways("data/c4.cgn.v7.1.symbols.gmt")
+  # cancer modules
+  cancer_module_gene_sets <- gmtPathways("data/c4.cm.v7.1.symbols.gmt")
+  
+  # c5: GO gene sets -  genes annotated by the same GO terms.
+  # biological processes
+  go_bp_gene_sets <- gmtPathways("data/c5.bp.v7.1.symbols.gmt")
+  
+  # c6: oncogenic gene sets - defined directly from microarray gene
+  # expression data from cancer gene perturbations.
+  oncogenic_gene_sets <- gmtPathways("data/c6.all.v7.1.symbols.gmt")
+  
+  # c7:	immunologic gene sets  defined directly from microarray gene
+  # expression data from immunologic studies.
+  immunologic_gene_sets <- gmtPathways("data/c7.all.v7.1.symbols.gmt")
+  
+  # Gene sets from Neftel et al, Cell, 2019
+  neftel <- read_tsv("data/Neftel_2019_states.tsv")
+  wang_proneural <- read_tsv("data/Wang_2017_proneural.tsv")
+  wang_mesenchymal <- read_tsv("data/Wang_2017_mesenchymal.tsv")
+  wang_classical <- read_tsv("data/Wang_2017_classical.tsv")
+  verhaak_proneural <- read_tsv("data/VERHAAK_GLIOBLASTOMA_PRONEURAL.txt", skip = 2, col_names = FALSE)
+  verhaak_neural <- read_tsv("data/VERHAAK_GLIOBLASTOMA_NEURAL.txt", skip = 2, col_names = FALSE)
+  verhaak_mesenchymal <- read_tsv("data/VERHAAK_GLIOBLASTOMA_MESENCHYMAL.txt", skip = 2, col_names = FALSE)
+  verhaak_classical <- read_tsv("data/VERHAAK_GLIOBLASTOMA_CLASSICAL.txt", skip = 2, col_names = FALSE)
+
+  gbm_lists <- list(neftel_MES1 = neftel$MES1[complete.cases(neftel$MES1)],
+                 neftel_MES2 = neftel$MES2[complete.cases(neftel$MES2)],
+                 neftel_AC = neftel$AC[complete.cases(neftel$AC)],
+                 neftel_OPC = neftel$OPC[complete.cases(neftel$OPC)],
+                 neftel_NPC1 = neftel$NPC1[complete.cases(neftel$NPC1)],
+                 neftel_NPC2 = neftel$NPC2[complete.cases(neftel$NPC2)],
+                 neftel_G1S = neftel$`G1/S`[complete.cases(neftel$`G1/S`)],
+                 neftel_G2M = neftel$`G2/M`[complete.cases(neftel$`G2/M`)],
+                 wang_proneural = wang_proneural$GeneSymbol,
+                 wang_mesenchymal = wang_mesenchymal$GeneSymbol,
+                 wang_classical = wang_classical$GeneSymbol,
+                 verhaak_proneural = verhaak_proneural$X1,
+                 verhaak_neural = verhaak_neural$X1,
+                 verhaak_mesenchymal = verhaak_mesenchymal$X1,
+                 verhaak_classical = verhaak_classical$X1)
+  
+  # Combine as a list of lists
+  pathways <- list(all_gene_sets, hallmark_gene_sets, positional_gene_sets,
+                   perturbations_gene_sets, canonical_pathways_gene_sets, 
+                   biocarta_gene_sets, kegg_gene_sets, pid_gene_sets, reactome_gene_sets,
+                   tf_gene_sets, cancer_gene_gene_sets, cancer_module_gene_sets,
+                   go_bp_gene_sets, oncogenic_gene_sets, immunologic_gene_sets,
+                   gbm_lists)
+  # How many gene sets in each category?
+  sapply(pathways, length)
+  # Save out for faster loading next time
+  saveRDS(pathways, "data/MSigDB_and_gbm_gene_lists.rds")
+} else {
+  pathways <- readRDS("data/MSigDB_and_gbm_gene_lists.rds")
+}
 ```
