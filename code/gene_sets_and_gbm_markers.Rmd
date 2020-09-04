@@ -238,11 +238,13 @@ if(!file.exists("data/MSigDB_and_gbm_gene_lists.rds")){
   # expression data from immunologic studies.
   immunologic_gene_sets <- gmtPathways("data/c7.all.v7.1.symbols.gmt")
   
-  # Gene sets from Neftel et al, Cell, 2019
+  # Gene sets from Neftel et al 2019, Wang et al 2017, Wang et al 2019, Courturier 2020 & Verhaak
   neftel <- read_tsv("data/Neftel_2019_states.tsv")
-  wang_proneural <- read_tsv("data/Wang_2017_proneural.tsv")
-  wang_mesenchymal <- read_tsv("data/Wang_2017_mesenchymal.tsv")
-  wang_classical <- read_tsv("data/Wang_2017_classical.tsv")
+  wang2017_proneural <- read_tsv("data/Wang_2017_proneural.tsv")
+  wang2017_mesenchymal <- read_tsv("data/Wang_2017_mesenchymal.tsv")
+  wang2017_classical <- read_tsv("data/Wang_2017_classical.tsv")
+  wang2019 <- read_tsv("data/Wang_2019.tsv")
+  couturier2020 <- read_tsv("data/Couturier_2020.tsv")
   verhaak_proneural <- read_tsv("data/VERHAAK_GLIOBLASTOMA_PRONEURAL.txt", skip = 2, col_names = FALSE)
   verhaak_neural <- read_tsv("data/VERHAAK_GLIOBLASTOMA_NEURAL.txt", skip = 2, col_names = FALSE)
   verhaak_mesenchymal <- read_tsv("data/VERHAAK_GLIOBLASTOMA_MESENCHYMAL.txt", skip = 2, col_names = FALSE)
@@ -256,9 +258,15 @@ if(!file.exists("data/MSigDB_and_gbm_gene_lists.rds")){
                  neftel_NPC2 = neftel$NPC2[complete.cases(neftel$NPC2)],
                  neftel_G1S = neftel$`G1/S`[complete.cases(neftel$`G1/S`)],
                  neftel_G2M = neftel$`G2/M`[complete.cases(neftel$`G2/M`)],
-                 wang_proneural = wang_proneural$GeneSymbol,
-                 wang_mesenchymal = wang_mesenchymal$GeneSymbol,
-                 wang_classical = wang_classical$GeneSymbol,
+                 wang2017_proneural = wang2017_proneural$GeneSymbol,
+                 wang2017_mesenchymal = wang2017_mesenchymal$GeneSymbol,
+                 wang2017_classical = wang2017_classical$GeneSymbol,
+                 couturier_neuronal = couturier2020$couturier_neuronal[complete.cases(couturier2020$couturier_neuronal)],
+                 couturier_mesenchymal = couturier2020$couturier_mesenchymal,
+                 couturier_oligo_lineage = couturier2020$couturier_oligo_lineage[complete.cases(couturier2020$couturier_oligo_lineage)],
+                 couturier_glial_progenitor = couturier2020$couturier_glial_progenitor,
+                 wang2019_proneural = wang2019$proneural,
+                 wang2019_mesenchymal = wang2019$mesenchymal,
                  verhaak_proneural = verhaak_proneural$X1,
                  verhaak_neural = verhaak_neural$X1,
                  verhaak_mesenchymal = verhaak_mesenchymal$X1,
