@@ -24,7 +24,7 @@ cell.types <- gmtPathways("~/Downloads/c8.all.v7.5.1.symbols.gmt")
 C5.GOBP <- gmtPathways("~/Downloads/c5.go.bp.v7.5.1.symbols.gmt")
 C5.GOCC <- gmtPathways("~/Downloads/c5.go.cc.v7.5.1.symbols.gmt")
 C5.GOMF <- gmtPathways("~/Downloads/c5.go.mf.v7.5.1.symbols.gmt")
-
+pid <- gmtPathways("~/Downloads/c2.cp.pid.v7.5.1.symbols.gmt")
 
 
 # Save data ---------------------------------------------------------------
@@ -35,7 +35,8 @@ gbm <- list(
   cell_types = cell.types,
   go_biological_processes = C5.GOBP,
   go_cellular_components = C5.GOCC,
-  go_molecular_functions = C5.GOMF
+  go_molecular_functions = C5.GOMF,
+  pathway_interaction_database = pid
   )
 saveRDS(gbm, "data/MSigDB_and_gbm_gene_lists_subset.rds")
 
